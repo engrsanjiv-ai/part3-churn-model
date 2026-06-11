@@ -1,0 +1,57 @@
+# Virtual environment
+.venv/
+
+# Python cache and bytecode
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+
+# VS Code settings and local workspace files
+.vscode/
+*.code-workspace
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs and temporary files
+*.log
+*.tmp
+*.temp
+
+# Distribution / packaging
+build/
+dist/
+*.egg-info/
+.eggs/
+
+# Python packaging
+pip-wheel-metadata/
+*.whl
+
+# Test output
+htmlcov/
+.coverage
+.coverage.*
+.nox/
+.pytest_cache/
+
+# MacOS
+.DS_Store
+
+# Notebook output
+*.nbconvert.ipynb
+
+# Optional: ignore local data exports
+*.csv
+
+# Ignore Python virtual env folders created by IDEs
+env/
+venv/
+
+# Ignore system-specific files
+*.swp
+*~
