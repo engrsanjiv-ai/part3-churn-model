@@ -45,8 +45,6 @@ htmlcov/
 # Notebook output
 *.nbconvert.ipynb
 
-# Optional: ignore local data exports
-*.csv
 
 # Ignore Python virtual env folders created by IDEs
 env/
