@@ -4,10 +4,9 @@
 
 This repository contains a complete churn prediction model for a D2C personal-care brand. The model identifies customers likely to churn in the next 60 days, enabling targeted retention campaigns.
 
-**Snapshot Date:** 2025-09-30  
-**Target Window:** 60 days (2025-10-01 to 2025-11-29)  
+
 **Model:** XGBoost Classifier  
-**Performance:** ROC-AUC 0.8755 | F1-Score 0.8085 | Precision 73.1% | Recall 90.5%
+**Performance:** ROC-AUC 0.8777 | F1-Score 0.8172 | Precision 74.5% | Recall 90.5%
 
 ---
 
@@ -114,11 +113,11 @@ JSON file with model performance on test/validation sets:
 {
   "model": "XGBoost",
   "threshold": 0.3329,
-  "test_accuracy": 0.7857,
-  "test_precision": 0.7308,
+  "test_accuracy": 0.7976,
+  "test_precision": 0.7451,
   "test_recall": 0.9048,
-  "test_f1_score": 0.8085,
-  "test_roc_auc": 0.8755,
+  "test_f1_score": 0.8172,
+  "test_roc_auc": 0.8777,
   "n_features": 25,
   "n_test_samples": 336,
   "churn_rate_test": 0.50
@@ -149,13 +148,13 @@ Detailed error analysis with **10+ specific customer examples**:
   - Root cause analysis
   - Mitigation recommendations
 
-- **False Positives (56 cases):** Loyal customers incorrectly flagged
+- **False Positives (52 cases):** Loyal customers incorrectly flagged
   - 10 detailed examples showing why they were retained
   - Business impact quantification
   - Recommendations to reduce false positives
 
 - **True Positives (152 cases):** Successfully identified churners (reference)
-- **True Negatives (112 cases):** Successfully identified loyalists (reference)
+- **True Negatives (116 cases):** Successfully identified loyalists (reference)
 
 - **Aggregate Summary:** Sensitivity, specificity, predictive values
 - **ROI Analysis:** Campaign profitability despite errors (9x return)
@@ -186,7 +185,7 @@ Detailed error analysis with **10+ specific customer examples**:
 **Justification:**
 - Optimized for F1-score (business-aware trade-off between recall and precision)
 - 90.5% recall: Catches ~9 in 10 actual churners
-- 73.1% precision: When model says "churn", 73% actually churn
+- 74.5% precision: When model says "churn", 74.5% actually churn
 - Suitable for retention campaigns where cost-per-customer (₹350) << customer LTV (₹4,200)
 
 ### Features (25 total)
@@ -219,25 +218,25 @@ Detailed error analysis with **10+ specific customer examples**:
 
 | Metric | Value |
 |---|---|
-| Accuracy | 78.57% |
-| Precision | 73.08% |
+| Accuracy | 79.76% |
+| Precision | 74.51% |
 | Recall | 90.48% |
-| F1-Score | 0.8085 |
-| ROC-AUC | 0.8755 |
+| F1-Score | 0.8172 |
+| ROC-AUC | 0.8777 |
 
 ### Confusion Matrix
 
 |  | Pred. No-Churn | Pred. Churn |
 |---|---|---|
-| Actual No-Churn | 112 | 56 |
+| Actual No-Churn | 116 | 52 |
 | Actual Churn | 16 | 152 |
 
 ### Comparison: Baseline vs. Final Model
 
 | Metric | Baseline (LR) | Final (XGBoost) | Improvement |
 |---|---|---|---|
-| ROC-AUC | 0.7890 | 0.8755 | +8.6% ↑ |
-| F1-Score | 0.6850 | 0.8085 | +18.0% ↑ |
+| ROC-AUC | 0.7890 | 0.8777 | +8.8% ↑ |
+| F1-Score | 0.6850 | 0.8172 | +19.4% ↑ |
 
 ---
 
@@ -433,5 +432,5 @@ For questions, feedback, or deployment support:
 - Review notebook cells 8-9 for detailed error analysis
 
 **Version:** 1.0  
-**Last Updated:** 2025-09-30
+
 

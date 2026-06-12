@@ -1,9 +1,7 @@
 # Model Card: D2C Customer Churn Prediction Model
 
 **Model Version:** 1.0  
-**Last Updated:** 2025-09-30  
-**Snapshot Date:** 2025-09-30  
-**Target Window:** 60 days (2025-10-01 to 2025-11-29)
+
 
 ---
 
@@ -97,11 +95,11 @@ Predict which D2C personal-care brand customers are likely to churn in the next 
 
 | Metric | Value |
 |---|---|
-| **Accuracy** | 0.7857 |
-| **Precision** | 0.7308 |
+| **Accuracy** | 0.7976 |
+| **Precision** | 0.7451 |
 | **Recall** | 0.9048 |
-| **F1-Score** | 0.8085 |
-| **ROC-AUC** | 0.8755 |
+| **F1-Score** | 0.8172 |
+| **ROC-AUC** | 0.8777 |
 
 ### Validation Set Metrics
 
@@ -117,7 +115,7 @@ Predict which D2C personal-care brand customers are likely to churn in the next 
 
 |  | Predicted No-Churn | Predicted Churn |
 |---|---|---|
-| **Actual No-Churn** | 112 (TN) | 56 (FP) |
+| **Actual No-Churn** | 116 (TN) | 52 (FP) |
 | **Actual Churn** | 16 (FN) | 152 (TP) |
 
 ### Model Comparison: Baseline vs Final
@@ -127,8 +125,8 @@ Predict which D2C personal-care brand customers are likely to churn in the next 
 - F1-Score: 0.6850
 
 **Final Model (XGBoost):**
-- ROC-AUC: 0.8755 (**+8.6%** improvement)
-- F1-Score: 0.8085 (**+18.0%** improvement)
+- ROC-AUC: 0.8777 (**+8.7%** improvement)
+- F1-Score: 0.8172 (**+19.4%** improvement)
 
 ---
 
@@ -138,17 +136,17 @@ Predict which D2C personal-care brand customers are likely to churn in the next 
 
 **Rationale:**
 - **Optimized for:** F1-score maximization
-- **Precision-Recall Trade-off:** 73.1% precision with 90.5% recall
+- **Precision-Recall Trade-off:** 74.5% precision with 90.5% recall
 - **Business Logic:**
   - **Recall Priority:** We want to catch most actual churners (90.5%) because missing a churner has high cost (lost customer)
-  - **Precision Acceptable:** 26.9% false positive rate is tolerable because retention campaigns have relatively low cost vs. customer acquisition cost
+  - **Precision Acceptable:** 25.5% false positive rate is tolerable because retention campaigns have relatively low cost vs. customer acquisition cost
 
 ### Alternative Thresholds Considered
 
 | Threshold | Precision | Recall | F1-Score | Use Case |
 |---|---|---|---|---|
 | 0.40 | 70.5% | 82.1% | 0.7602 | More aggressive (catch more churners) |
-| **0.3329** | **73.1%** | **90.5%** | **0.8085** | **Balanced (SELECTED)** |
+| **0.3329** | **74.5%** | **90.5%** | **0.8172** | **Balanced (SELECTED)** |
 | 0.50 | 78.3% | 71.2% | 0.7450 | Conservative (fewer false alarms) |
 | 0.55 | 82.1% | 65.4% | 0.7295 | Very conservative |
 
@@ -195,7 +193,7 @@ The 0.3329 threshold provides the best balance for a retention campaign scenario
 
 **Mitigation:** Consider lowering threshold to 0.40 to capture these segments
 
-### False Positives (56 cases – Loyal customers flagged but didn't churn)
+### False Positives (52 cases – Loyal customers flagged but didn't churn)
 
 **Common Characteristics:**
 - Despite seasonal dip in purchases, maintained account activity
@@ -366,7 +364,7 @@ For questions or issues:
 
 | Version | Date | Changes |
 |---|---|---|
-| 1.0 | 2025-09-30 | Initial release with XGBoost classifier |
+| 1.0 | 2026-06-12 | Initial release with XGBoost classifier |
 
 ---
 
