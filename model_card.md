@@ -1,7 +1,6 @@
 # Model Card: D2C Customer Churn Prediction Model
 
-**Model Version:** 1.0  
-
+**Model Version:** 1.0
 
 ---
 
@@ -18,12 +17,17 @@ Predict which D2C personal-care brand customers are likely to churn in the next 
 
 ### Key Model Characteristics
 - **Algorithm:** Extreme Gradient Boosting (XGBoost)
-- **Number of Trees:** 100
-- **Max Depth:** 5
-- **Learning Rate:** 0.1
-- **Subsample:** 0.8
-- **Column Subsample:** 0.8
-- **Decision Threshold:** 0.3329 (optimized for F1-score)
+- **Number of Trees:** 500 (with early stopping, rounds=20)
+- **Max Depth:** 6
+- **Learning Rate:** 0.05
+- **Subsample:** 0.85
+- **Column Subsample:** 0.85
+- **Min Child Weight:** 3
+- **Gamma:** 0.1
+- **Scale Pos Weight:** 3
+- **L1 Regularization (reg_alpha):** 0.1
+- **L2 Regularization (reg_lambda):** 1.5
+- **Decision Threshold:** 0.5477 (F1-score optimized)
 
 ---
 
@@ -37,9 +41,9 @@ Predict which D2C personal-care brand customers are likely to churn in the next 
 ### Data Split
 | Set | Size | Churn Rate |
 |---|---|---|
-| Training | 1,728 customers | 47.5% |
-| Validation | 336 customers | 43.8% |
-| Test | 336 customers | 50.0% |
+| Training | 1,728 customers | 46.99% |
+| Validation | 336 customers | 43.75% |
+| Test | 336 customers | 50.00% |
 
 ### Feature Categories (25 features total)
 
@@ -67,7 +71,7 @@ Predict which D2C personal-care brand customers are likely to churn in the next 
 - `negative_ticket_rate_90d` – Fraction of tickets with negative sentiment
 - `avg_resolution_hours_90d` – Average resolution time
 
-#### Web/App Engagement (7 features)
+#### Web/App Engagement (8 features)
 - `sessions_30d` – Number of web/app sessions in last 30 days
 - `product_views_30d` – Product detail pages viewed
 - `cart_adds_30d` – Items added to cart
@@ -95,66 +99,73 @@ Predict which D2C personal-care brand customers are likely to churn in the next 
 
 | Metric | Value |
 |---|---|
-| **Accuracy** | 0.7976 |
-| **Precision** | 0.7451 |
-| **Recall** | 0.9048 |
-| **F1-Score** | 0.8172 |
-| **ROC-AUC** | 0.8777 |
+| **Accuracy** | 0.7857 |
+| **Precision** | 0.7330 |
+| **Recall** | 0.8988 |
+| **F1-Score** | 0.8075 |
+| **ROC-AUC** | 0.8710 |
 
 ### Validation Set Metrics
 
 | Metric | Value |
 |---|---|
-| Accuracy | 0.8006 |
-| Precision | 0.7299 |
-| Recall | 0.8639 |
-| F1-Score | 0.7913 |
-| ROC-AUC | 0.8788 |
+| Accuracy | 0.7946 |
+| Precision | 0.7167 |
+| Recall | 0.8776 |
+| F1-Score | 0.7890 |
+| ROC-AUC | 0.8822 |
 
 ### Confusion Matrix (Test Set)
 
 |  | Predicted No-Churn | Predicted Churn |
 |---|---|---|
-| **Actual No-Churn** | 116 (TN) | 52 (FP) |
-| **Actual Churn** | 16 (FN) | 152 (TP) |
+| **Actual No-Churn** | 113 (TN) | 55 (FP) |
+| **Actual Churn** | 17 (FN) | 151 (TP) |
 
 ### Model Comparison: Baseline vs Final
 
 **Baseline Model (Logistic Regression):**
-- ROC-AUC: 0.7890
-- F1-Score: 0.6850
+- Accuracy: 0.8185
+- Precision: 0.8209
+- Recall: 0.7483
+- F1-Score: 0.7829
+- ROC-AUC: 0.8846
 
-**Final Model (XGBoost):**
-- ROC-AUC: 0.8777 (**+8.7%** improvement)
-- F1-Score: 0.8172 (**+19.4%** improvement)
+**Final Model (XGBoost — Tuned + Threshold Optimized):**
+- Accuracy: 0.7857
+- Precision: 0.7330
+- Recall: 0.8988 (**+15.1pp** improvement)
+- F1-Score: 0.8075 (**+3.1%** improvement)
+- ROC-AUC: 0.8710
+
+> **Why XGBoost over Logistic Regression?** Although LR has higher accuracy and precision, XGBoost catches **89.9% of churners vs 74.8%** — approximately 130 extra customers saved per 1,000 churners. For churn use cases, recall is the priority metric.
 
 ---
 
 ## 4. Decision Threshold & Business Justification
 
-### Threshold Selection: 0.3329
+### Threshold Selection: 0.5477
 
 **Rationale:**
-- **Optimized for:** F1-score maximization
-- **Precision-Recall Trade-off:** 74.5% precision with 90.5% recall
+- **Optimized for:** F1-score maximization on validation set using Precision-Recall curve
+- **Precision-Recall Trade-off:** 73.3% precision with 89.9% recall
 - **Business Logic:**
-  - **Recall Priority:** We want to catch most actual churners (90.5%) because missing a churner has high cost (lost customer)
-  - **Precision Acceptable:** 25.5% false positive rate is tolerable because retention campaigns have relatively low cost vs. customer acquisition cost
+  - **Recall Priority:** We want to catch most actual churners (89.9%) because missing a churner has high cost (lost customer lifetime value)
+  - **Precision Acceptable:** False positive rate is tolerable because retention campaigns have low cost relative to customer acquisition cost
 
 ### Alternative Thresholds Considered
 
-| Threshold | Precision | Recall | F1-Score | Use Case |
-|---|---|---|---|---|
-| 0.40 | 70.5% | 82.1% | 0.7602 | More aggressive (catch more churners) |
-| **0.3329** | **74.5%** | **90.5%** | **0.8172** | **Balanced (SELECTED)** |
-| 0.50 | 78.3% | 71.2% | 0.7450 | Conservative (fewer false alarms) |
-| 0.55 | 82.1% | 65.4% | 0.7295 | Very conservative |
+| Threshold | Description | Use Case |
+|---|---|---|
+| **0.5477** | **F1-maximized (SELECTED)** | **Best precision-recall balance** |
+| 0.0170 | 85% recall target | Overly aggressive — flags nearly all customers, destroys precision |
+| 0.50 | Default | Conservative — misses more churners |
 
 **Selected Threshold Reasoning:**
-The 0.3329 threshold provides the best balance for a retention campaign scenario where:
-1. **Cost of False Negative (missing a churner):** ₹3,500–5,000 per lost customer
+The 0.5477 threshold provides the best F1-score balance for a retention campaign scenario where:
+1. **Cost of False Negative (missing a churner):** ₹3,500–5,000 per lost customer (LTV loss)
 2. **Cost of False Positive (unnecessary retention offer):** ₹200–500 per customer
-3. Ratio of risks justifies higher recall over precision
+3. The 10:1 cost ratio strongly justifies prioritizing recall over precision
 
 ---
 
@@ -164,46 +175,50 @@ The 0.3329 threshold provides the best balance for a retention campaign scenario
 
 | Rank | Feature | Importance | Business Interpretation |
 |---|---|---|---|
-| 1 | `recency_days` | 0.2840 | Days since last purchase is strongest churn signal |
-| 2 | `last_visit_days_ago` | 0.1920 | Recent engagement on platform is critical |
-| 3 | `sessions_30d` | 0.1680 | Active web/app usage prevents churn |
-| 4 | `frequency_180d` | 0.1550 | Regular purchasing behavior indicates loyalty |
-| 5 | `ticket_count_90d` | 0.1020 | High support issues correlate with churn |
-| 6 | `monetary_180d` | 0.0950 | Spending level affects churn probability |
-| 7 | `abandoned_carts_30d` | 0.0850 | Cart abandonment is friction indicator |
-| 8 | `negative_ticket_rate_90d` | 0.0780 | Support satisfaction matters |
-| 9 | `category_diversity_180d` | 0.0620 | Product exploration reduces churn |
-| 10 | `email_opens_30d` | 0.0580 | Email engagement shows interest |
+| 1 | `recency_days` | 0.1861 | Days since last purchase is by far the strongest churn signal |
+| 2 | `negative_ticket_rate_90d` | 0.0580 | Support dissatisfaction is a leading churn driver |
+| 3 | `return_rate_180d` | 0.0576 | High return rate signals product-fit issues |
+| 4 | `last_visit_days_ago` | 0.0574 | Recent platform engagement strongly predicts retention |
+| 5 | `monetary_180d` | 0.0464 | Spending level correlates with churn likelihood |
+| 6 | `frequency_180d` | 0.0442 | Regular purchasing behaviour indicates loyalty |
+| 7 | `category_diversity_180d` | 0.0395 | Broader product exploration reduces churn risk |
+| 8 | `avg_resolution_hours_90d` | 0.0371 | Slow support resolution increases churn probability |
+| 9 | `sessions_30d` | 0.0334 | Active web/app usage signals continued interest |
+| 10 | `cart_adds_30d` | 0.0319 | Cart activity reflects purchase intent |
 
-**Key Insight:** Engagement and recency dominate the model. Customers who haven't purchased recently and show low platform activity are at highest churn risk.
+**Key Insight:** Recency dominates all other features at 0.1861 importance — nearly 3× the next feature. Beyond recency, support experience (negative ticket rate, slow resolution) and purchase behaviour (return rate, monetary value) are the next strongest signals. Customers who haven't purchased recently, have raised dissatisfied support tickets, and show high return rates are at the highest churn risk.
 
 ---
 
 ## 6. Error Analysis
 
-### False Negatives (16 cases – Actual churners we missed)
+### False Negatives (17 cases — Actual churners we missed)
 
-**Common Characteristics:**
-- Very low engagement: <2 web sessions in 30 days
-- Long recency: 90+ days since last purchase
-- Sporadic purchasers: 1–2 orders in 180 days
-- Low monetary value: ₹300–800 spending
+**Common Characteristics (from actual error analysis):**
+- Moderate recency: avg 45.9 days since last purchase (range: 9–100 days) — these customers weren't obviously lapsed
+- Decent session activity: avg 6.8 sessions/30 days — appeared engaged on platform
+- Low purchase frequency: avg 2.3 orders in 180 days (median: 2)
+- Moderate spending: avg ₹1,685 in 180 days (range: ₹403–₹4,340)
 
-**Business Impact:** High – we miss retention opportunity with these customers
+**Why the model missed them:** These customers showed surface-level engagement (sessions, visits) but still churned — likely driven by factors the model underweights (product dissatisfaction, price sensitivity, competitor switching).
 
-**Mitigation:** Consider lowering threshold to 0.40 to capture these segments
+**Business Impact:** High — we miss retention opportunity with these 17 customers
 
-### False Positives (52 cases – Loyal customers flagged but didn't churn)
+**Mitigation:** Combine model score with rule-based triggers on purchase frequency; customers with ≤2 orders in 180 days should be reviewed regardless of predicted probability
 
-**Common Characteristics:**
-- Despite seasonal dip in purchases, maintained account activity
-- Positive support interactions resolved quickly
-- Long account tenure (>300 days)
-- Previously loyal with high historical spending
+### False Positives (55 cases — Loyal customers flagged but didn't churn)
 
-**Business Impact:** Moderate – cost of unnecessary retention offer (₹200–500) is manageable vs. customer lifetime value
+**Common Characteristics (from actual error analysis):**
+- High recency: avg 84.9 days since last purchase (range: 16–262 days) — genuinely looked lapsed
+- Low session activity: avg 4.9 sessions/30 days (median: 3) — low platform engagement
+- Very low purchase frequency: avg 1.5 orders in 180 days (median: 1)
+- Lower spending: avg ₹1,079 in 180 days vs ₹1,685 for missed churners
 
-**Mitigation:** Combine model predictions with RFM loyalty tier for final retention decisions
+**Why the model flagged them:** Their behavioural signals genuinely resembled churners — long recency, low frequency, low sessions. They likely experienced a seasonal or lifecycle dip but retained nonetheless.
+
+**Business Impact:** Moderate — cost of unnecessary retention offer (₹200–500 per customer × 55 = ₹11,000–₹27,500) is manageable vs. customer LTV
+
+**Mitigation:** Combine model scores with RFM loyalty tier; deprioritise retention offers for high-tenure customers with strong historical spend even if recently inactive
 
 ---
 
@@ -213,23 +228,23 @@ The 0.3329 threshold provides the best balance for a retention campaign scenario
 
 1. **Recency Bias:** Model heavily depends on recent purchase patterns. Seasonal products may show false churn signals during off-season.
 
-2. **New Customer Blind Spot:** Customers with <30 days since signup have sparse engagement history; model may underpredict churn.
+2. **New Customer Blind Spot:** Customers with fewer than 30 days since signup have sparse engagement history; model may underpredict churn.
 
-3. **Web Activity Dependency:** Model assumes customers use web/app. Customers preferring phone/email ordering may appear disengaged.
+3. **Web Activity Dependency:** Model assumes customers use web/app. Customers preferring phone/email ordering may appear disengaged without being at-risk.
 
-4. **Temporal Drift:** Model trained on 2025-01-01 to 2025-09-30 may degrade if customer behavior shifts significantly.
+4. **Temporal Drift:** Model trained on 2025-01-01 to 2025-09-30 data may degrade if customer behavior shifts significantly post-training.
 
 5. **Label Definition:** Target assumes no purchase in 60-day window = churn. Doesn't distinguish between true churn vs. natural low-purchase periods.
 
-6. **Class Imbalance:** Despite engineered features, the dataset has ~39% churn, which may bias toward majority class under certain thresholds.
+6. **Class Imbalance:** Despite engineered features, the dataset has ~47.5% churn in training, which may not reflect real-world base rates.
 
 ### When NOT to Use This Model
 
-❌ Do not use for customers acquired in last 30 days (insufficient historical data)  
+❌ Do not use for customers acquired in the last 30 days (insufficient historical data)  
 ❌ Do not use for seasonal products without external calendar adjustments  
-❌ Do not use after 90+ days without retraining (concept drift)  
+❌ Do not use after 90+ days without retraining (concept drift risk)  
 ❌ Do not use for highly personalized medical/healthcare products (different churn drivers)  
-❌ Do not rely on probabilities >0.9 without manual review (extreme cases may be data errors)
+❌ Do not rely on probabilities >0.9 without manual review (extreme cases may indicate data errors)
 
 ---
 
@@ -237,13 +252,13 @@ The 0.3329 threshold provides the best balance for a retention campaign scenario
 
 ### Potential Biases
 
-1. **Acquisition Channel Bias:** Customers acquired through paid ads may show different churn patterns than organic/referral customers. Retention strategy should account for this.
+1. **Acquisition Channel Bias:** Customers acquired through paid ads may show different churn patterns than organic/referral customers. Retention strategy should account for channel differences.
 
 2. **City Tier Bias:** Urban (Tier 1) customers may have different retention needs vs. rural (Tier 3) customers.
 
 3. **Age Group Disparities:** Younger cohorts (18-24) may show higher churn due to experimentation; older cohorts (45+) may be more price-sensitive.
 
-4. **Loyalty Tier Exclusion:** Customers not enrolled in loyalty program (null values) excluded from that feature. This may bias against certain segments.
+4. **Loyalty Tier Exclusion:** Customers not enrolled in the loyalty program (null values) are excluded from that feature, which may bias predictions against certain segments.
 
 ### Responsible Use Guidelines
 
@@ -251,15 +266,15 @@ The 0.3329 threshold provides the best balance for a retention campaign scenario
 - Use model predictions to identify at-risk segments for deeper analysis
 - Combine model scores with business context and customer service input
 - Monitor actual churn outcomes to validate model effectiveness
-- Regularly retrain model with new data (quarterly recommended)
+- Retrain quarterly with fresh data
 - Document retention campaign decisions and outcomes
 
 ❌ **DON'T:**
-- Use model as sole basis for terminating customer accounts
-- Apply identical retention offers to all flagged customers (segment-specific strategies better)
+- Use model as the sole basis for any customer account decision
+- Apply identical retention offers to all flagged customers (segment-specific strategies perform better)
 - Rely on model without human review for high-value customers
 - Use model for non-retention purposes (e.g., dynamic pricing discrimination)
-- Deploy model without fairness checks across demographic groups
+- Deploy without fairness checks across demographic groups
 
 ### Fairness Metrics (Recommended for Monitoring)
 
@@ -273,46 +288,32 @@ Monitor disparate impact across groups:
 
 ## 9. Deployment & Monitoring
 
-### Model Deployment
+### Model Artifacts
 
-**Artifact Location:** `model.pkl`  
-**Loading Example:**
+| File | Description |
+|---|---|
+| `model.pkl` | Trained XGBoost classifier |
+| `model_artifacts.pkl` | Threshold, feature names, label encoders |
+| `metrics.json` | Full performance metrics |
+
+### Loading & Prediction
+
 ```python
 import joblib
+
 model = joblib.load('model.pkl')
 artifacts = joblib.load('model_artifacts.pkl')
 
-# Predict
-proba = model.predict_proba(X_test)[:, 1]
+# Predict churn probability
+proba = model.predict_proba(X_new)[:, 1]
+
+# Apply optimized threshold
 predictions = (proba >= artifacts['threshold']).astype(int)
+# artifacts['threshold'] = 0.5477
 ```
 
-### Monitoring Plan
+### API Output Schema
 
-#### Data Drift Detection
-- Monthly check: distribution of key features (recency, sessions_30d, monetary_180d)
-- Alert if feature mean changes >15% month-over-month
-
-#### Model Performance Monitoring
-- Compute monthly confusion matrix on new holdout data
-- Alert if precision drops below 70% or recall below 70%
-- Track F1-score; alert if drops below 0.72
-
-#### Business Outcome Tracking
-- Measure actual churn rate of flagged vs. unflagged customers
-- Calculate campaign ROI: (revenue retained – campaign cost) / campaign cost
-- Monitor customer satisfaction (NPS, review ratings) for retention campaign recipients
-
-#### Retraining Triggers
-- **Schedule:** Retrain quarterly (every 90 days)
-- **Drift Trigger:** If any feature distribution shift >20%
-- **Performance Trigger:** If validation ROC-AUC drops below 0.82
-- **Time Trigger:** If >180 days since last model update
-
-### API Integration
-
-**Input:** Customer feature vector at prediction time  
-**Output:**
 ```json
 {
   "customer_id": "CUST00123",
@@ -323,6 +324,28 @@ predictions = (proba >= artifacts['threshold']).astype(int)
 }
 ```
 
+### Monitoring Plan
+
+#### Data Drift Detection
+- Monthly check: distribution of key features (`recency_days`, `sessions_30d`, `monetary_180d`)
+- Alert if feature mean changes >15% month-over-month
+
+#### Model Performance Monitoring
+- Compute monthly confusion matrix on new holdout data
+- Alert if precision drops below 70% or recall drops below 80%
+- Track F1-score; alert if it falls below 0.75
+
+#### Business Outcome Tracking
+- Measure actual churn rate of flagged vs. unflagged customers
+- Calculate campaign ROI: (revenue retained – campaign cost) / campaign cost
+- Monitor customer satisfaction (NPS, review ratings) for retention campaign recipients
+
+#### Retraining Triggers
+- **Schedule:** Retrain quarterly (every 90 days)
+- **Drift Trigger:** If any key feature distribution shifts >20%
+- **Performance Trigger:** If validation ROC-AUC drops below 0.82
+- **Time Trigger:** If >180 days since last model update
+
 ---
 
 ## 10. Development & Testing
@@ -330,6 +353,7 @@ predictions = (proba >= artifacts['threshold']).astype(int)
 ### Development Environment
 - **Python Version:** 3.9+
 - **Key Libraries:** XGBoost, scikit-learn, pandas, numpy, joblib
+- **Random Seed:** 42
 - **Hardware:** CPU (no GPU required)
 
 ### Test Coverage
@@ -337,25 +361,25 @@ predictions = (proba >= artifacts['threshold']).astype(int)
 ✅ Prediction consistency: Validated  
 ✅ Batch prediction: Validated  
 ✅ Edge cases (missing values, outliers): Validated  
-✅ Threshold behavior: Validated
+✅ Threshold behavior: Validated  
+✅ Label encoder classes preserved in artifacts: Validated
 
 ### Code Quality
 - Code reviewed for leakage: ✅ No leakage detected
-- Features validated as pre-snapshot: ✅ Confirmed
-- Reproducibility: ✅ Random seed set to 42
+- Features validated as pre-snapshot: ✅ Confirmed (snapshot date: 2025-09-30)
+- Reproducibility: ✅ Random seed fixed at 42
 
 ---
 
 ## 11. Contact & Support
 
-**Model Owner:** Analytics & ML Team  
-**Last Reviewed:** 2025-09-30  
-**Next Review Due:** 2025-12-30
+**Model Owner:** Sanjiv
+
 
 For questions or issues:
 1. Check model metrics in `metrics.json`
-2. Review error analysis in `error_analysis.md`
-3. Verify data quality and feature engineering in notebook cells
+2. Review error analysis in notebook Section 8
+3. Verify data quality and feature engineering in notebook Sections 2–3
 4. Contact ML team with specific use cases
 
 ---
@@ -364,7 +388,7 @@ For questions or issues:
 
 | Version | Date | Changes |
 |---|---|---|
-| 1.0 | 2026-06-12 | Initial release with XGBoost classifier |
+| 1.0 | 2026-06-13 | Initial release — XGBoost classifier with F1-optimized threshold (0.5477) |
 
 ---
 
