@@ -38,15 +38,14 @@ part3-churn-model/
 
 ---
 
-## Quick Start
+## Quick Start 
 
-### 1. Install Dependencies
+### 1. Install Dependencies (Tested on Python 3.11.9)
 
 ```bash
 pip install -r requirements.txt
 ```
 
-**Tested with Python 3.11.9+**
 
 ### 2. Run the Notebook
 
