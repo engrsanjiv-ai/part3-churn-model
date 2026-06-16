@@ -46,7 +46,7 @@ part3-churn-model/
 pip install -r requirements.txt
 ```
 
-**Tested with Python 3.9+**
+**Tested with Python 3.11.9+**
 
 ### 2. Run the Notebook
 
@@ -285,7 +285,7 @@ Refer model_card.md
 
 ### Environment
 
-- **Python:** 3.9+ (tested on 3.10, 3.11)
+- **Python:** 3.11.9
 - **OS:** Windows/Mac/Linux
 - **Dependencies:** See requirements.txt
 
